@@ -80,40 +80,36 @@ const iconsList = [
 const slides = [
   {
     id: 1,
-    title: "Sofi",
-    img: "/images/p1.png",
+    title: "POS System",
+    img: "/images/enhance.png",
+    url: "https://pos-system.example.com", // add your project link here
   },
   {
     id: 2,
-    title: "Jasmina",
-    img: "/images/p2.png",
+    title: "ERP System",
+    img: "/images/ERP.png",
+    url: "https://e-r-p.vercel.app/dashboard",
   },
   {
     id: 3,
-    title: "d.tampe",
-    img: "/images/p3.png",
+    title: "Applicant Portal",
+    img: "/images/Applicant_portal.png",
+    url: "https://nes-tick-cdkf.vercel.app/",
   },
   {
     id: 4,
-    title: "Blimp.gr",
-    img: "/images/p4.png",
+    title: "Portfolio Handler",
+    img: "/images/dashboard.png",
+    url: "https://nes-tick-portfolio-handler.vercel.app/",
   },
   {
     id: 5,
-    title: "Hawk Style Design",
-    img: "/images/p5.png",
-  },
-  {
-    id: 6,
-    title: "Lewis",
-    img: "/images/p6.png",
-  },
-  {
-    id: 7,
-    title: "Sofi",
-    img: "/images/p1.png",
-  },
+    title: "Personal Portfolio",
+    img: "/images/3d.png",
+    url: "https://3d-portfolio-site-six.vercel.app/",
+  }
 ];
+
 
 const testimonials = [
   {
