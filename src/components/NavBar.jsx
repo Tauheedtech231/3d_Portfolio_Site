@@ -1,14 +1,20 @@
 import { navItems } from "../constants";
+import { Code } from "lucide-react"; // import the code icon
 
 const NavBar = () => {
   return (
-    <div className="w-full flex-center fixed z-50 top-0 left-0 md:p-0 px-5">
+    <div className="w-full flex-center fixed z-50 top-0 left-0 md:p-0 px-5 bg-transparent">
       <div className="container md:my-10 my-5 flex items-center justify-between">
-        <img
-          src="/images/logo.png"
-          alt="logo"
-          className="md:size-12 size-10 object-cover object-center"
-        />
+
+        {/* Logo with Developer Tag */}
+        <div className="flex items-center gap-2">
+          <Code className="text-white md:w-8 md:h-8 w-6 h-6" /> {/* code icon */}
+          <span className="text-white/70 md:text-lg text-sm font-medium tracking-wide">
+            Developer
+          </span>
+        </div>
+
+        {/* Nav Items */}
         <div className="md:flex items-center gap-7 hidden">
           {navItems.map((item, index) => (
             <div
@@ -23,6 +29,7 @@ const NavBar = () => {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );

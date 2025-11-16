@@ -1,8 +1,10 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as Z from "zod";
-import emailjs from "@emailjs/browser";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const contactFormSchema = Z.object({
   name: Z.string().nonempty("Name is required"),
@@ -33,80 +35,87 @@ const ContactForm = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const payload = {
-        from_name: data.name,
-        to_name: "Full Stack Developer",
-        message: data.message,
-        reply_to: data.email,
-        subject: data.subject,
-      };
+      const response = await fetch(
+        "https://nes-tick-portfolio-handler.vercel.app/api/contact",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
-      const serviceID = import.meta.env.VITE_EMAIL_SERVICE_ID;
-      const templateID = import.meta.env.VITE_EMAIL_TEMPLATE_ID;
-      const userID = import.meta.env.VITE_EMAIL_PUBLIC_KEY;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error sending message:", errorText);
+        throw new Error(errorText || "Failed to send message");
+      }
 
-      await emailjs.send(serviceID, templateID, payload, {
-        publicKey: userID,
+      Swal.fire({
+        title: "Message Sent!",
+        text: "Thank you for reaching out. I will get back to you soon.",
+        icon: "success",
+        confirmButtonColor: "#22c55e",
       });
+
+      reset(initialValues);
     } catch (error) {
-      console.log("FAILED...", error);
-      alert("Failed to send message, please try again.");
+      console.error("Submission failed:", error);
+      Swal.fire({
+        title: "Oops!",
+        text: error.message || "Failed to send your message. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#ef4444",
+      });
     } finally {
       setLoading(false);
-      reset(initialValues);
-      alert("Message sent successfully!");
     }
   };
 
   return (
-    <div className="flex-center">
+    <div className="flex justify-center items-center py-16">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full text-[#a7a7a7] flex flex-col gap-7"
+        className="w-full max-w-2xl bg-gray-900/90 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col gap-6 border border-gray-700"
       >
-        <div>
-          <label
-            className="block text-white md:text-2xl font-semibold mb-2"
-            htmlFor="name"
-          >
+        <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 mb-6">
+          Contact Me
+        </h2>
+
+        {/* Name */}
+        <div className="flex flex-col">
+          <label className="text-white font-semibold mb-2 md:text-lg text-base" htmlFor="name">
             Name
           </label>
           <input
             {...register("name")}
             type="text"
             id="name"
-            placeholder="Tommy"
-            className="w-full px-4 py-4 font-light md:text-base text-sm placeholder:text-[#fafafa50] bg-black-300 rounded-md"
+            placeholder="Your Name"
+            className="w-full px-5 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
           />
-          {errors.name && (
-            <span className="text-red-500">{errors.name.message}</span>
-          )}
+          {errors.name && <span className="text-red-500 mt-1 text-sm">{errors.name.message}</span>}
         </div>
 
-        <div>
-          <label
-            className="block md:text-2xl font-semibold mb-2"
-            htmlFor="email"
-          >
-            Email address
+        {/* Email */}
+        <div className="flex flex-col">
+          <label className="text-white font-semibold mb-2 md:text-lg text-base" htmlFor="email">
+            Email
           </label>
           <input
-            type="email"
             {...register("email")}
+            type="email"
             id="email"
-            placeholder="hello@gmail.com"
-            className="w-full px-4 py-4 font-light md:text-base text-sm placeholder:text-[#fafafa50] bg-black-300 rounded-md"
+            placeholder="hello@example.com"
+            className="w-full px-5 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
           />
-          {errors.email && (
-            <span className="text-red-500">{errors.email.message}</span>
-          )}
+          {errors.email && <span className="text-red-500 mt-1 text-sm">{errors.email.message}</span>}
         </div>
 
-        <div>
-          <label
-            className="block md:text-2xl font-semibold mb-2"
-            htmlFor="subject"
-          >
+        {/* Subject */}
+        <div className="flex flex-col">
+          <label className="text-white font-semibold mb-2 md:text-lg text-base" htmlFor="subject">
             Subject
           </label>
           <input
@@ -114,35 +123,30 @@ const ContactForm = () => {
             type="text"
             id="subject"
             placeholder="Enter your subject"
-            className="w-full px-4 py-4 font-light md:text-base text-sm placeholder:text-[#fafafa50] bg-black-300 rounded-md"
+            className="w-full px-5 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
           />
-          {errors.subject && (
-            <span className="text-red-500">{errors.subject.message}</span>
-          )}
+          {errors.subject && <span className="text-red-500 mt-1 text-sm">{errors.subject.message}</span>}
         </div>
 
-        <div>
-          <label
-            className="block md:text-2xl font-semibold mb-2"
-            htmlFor="message"
-          >
+        {/* Message */}
+        <div className="flex flex-col">
+          <label className="text-white font-semibold mb-2 md:text-lg text-base" htmlFor="message">
             Message
           </label>
           <textarea
-            id="message"
             {...register("message")}
-            placeholder="Enter your message"
-            rows="5"
-            className="w-full px-4 py-4 font-light md:text-base text-sm placeholder:text-[#fafafa50] bg-black-300 rounded-md"
-          ></textarea>
-          {errors.message && (
-            <span className="text-red-500">{errors.message.message}</span>
-          )}
+            id="message"
+            placeholder="Write your message..."
+            rows={6}
+            className="w-full px-5 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+          />
+          {errors.message && <span className="text-red-500 mt-1 text-sm">{errors.message.message}</span>}
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-4 bg-blue-50 text-white-50 font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+          className="w-full py-4 bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold rounded-xl hover:opacity-90 transition duration-300"
         >
           {loading ? "Sending..." : "Send Message"}
         </button>

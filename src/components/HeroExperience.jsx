@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Boy } from "./models/Boy";
-
+/* eslint-disable react/no-unknown-property */
 const HeroExperience = () => {
   return (
     <Canvas>

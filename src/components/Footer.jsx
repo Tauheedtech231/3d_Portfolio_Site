@@ -1,33 +1,27 @@
-import { footerIconsList } from "../constants";
-
 const Footer = () => {
   return (
-    <div className="w-full flex-center flex-col md:gap-10 gap-7 bg-black-300 py-10">
-      <div>
-        <img
-          src="/images/logo.png"
-          alt="logo"
-          className="w-7 h-7 object-cover object-center"
-        />
-      </div>
-      <div className="flex items-center md:gap-16 gap-8">
-        {footerIconsList.map((icon, index) => (
-          <div
-            key={index}
-            className="cursor-pointer hover:-translate-y-5 transition-all duration-700"
-          >
-            <img
-              src={icon.icon}
-              alt={icon.name}
-              className="md:size-10 size-8"
-            />
-          </div>
-        ))}
-      </div>
-      <p className="font-regular md:text-lg text-sm">
-        2025 © All rights reserved.
+    <footer className="w-full flex-center flex-col md:gap-6 gap-4 bg-black-300 py-10 border-t border-gray-700">
+      {/* Email */}
+      <a
+        href="mailto:tauheeddeveloper13@gmail.com"
+        className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 md:text-lg text-sm font-medium hover:opacity-90 transition-opacity"
+      >
+        tauheeddeveloper13@gmail.com
+      </a>
+
+      {/* Phone */}
+      <a
+        href="tel:+923237594869"
+        className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 md:text-lg text-sm font-medium hover:opacity-90 transition-opacity"
+      >
+        +92 323 7594869
+      </a>
+
+      {/* Footer Text */}
+      <p className="font-light md:text-lg text-sm text-white/80 mt-4">
+        2025 © All rights reserved. Designed & Developed by Tauheed
       </p>
-    </div>
+    </footer>
   );
 };
 

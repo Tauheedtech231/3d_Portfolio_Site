@@ -12,8 +12,8 @@ const navItems = [
     href: "#projects",
   },
   {
-    name: "Testimonials",
-    href: "#testimonials",
+    name: "Journey",
+    href: "#journey",
   },
   {
     name: "Contact",
@@ -23,26 +23,22 @@ const navItems = [
 
 const bentoSocialLinks = [
   {
-    name: "Facebook",
-    href: "https://www.facebook.com/",
-    icon: "/images/fb.svg",
-  },
-  {
-    name: "Instagram",
-    href: "https://www.facebook.com/",
-    icon: "/images/insta.svg",
-  },
-  {
     name: "LinkedIn",
-    href: "https://www.facebook.com/",
+    href: "https://www.linkedin.com/in/tauheed-khan-0781aa334/",
     icon: "/images/linkedin.svg",
   },
   {
+    name: "GitHub",
+    href: "https://github.com/Tauheedtech231",
+    icon: "/images/github.svg", // Make sure you have this icon in /images/
+  },
+  {
     name: "WhatsApp",
-    href: "https://www.facebook.com/",
+    href: "https://wa.me/923237594869", // WhatsApp direct link with country code
     icon: "/images/whatsapp.svg",
   },
 ];
+
 
 const iconsList = [
   {
@@ -77,14 +73,8 @@ const iconsList = [
     name: "threejs",
     image: "/images/threejs.svg",
   },
-  {
-    name: "figma",
-    image: "/images/figma.svg",
-  },
-  {
-    name: "aws",
-    image: "/images/aws.svg",
-  },
+ 
+  
 ];
 
 const slides = [
@@ -157,27 +147,22 @@ const testimonials = [
 ];
 
 const footerIconsList = [
-  {
-    name: "Facebook",
-    href: "https://www.facebook.com/",
-    icon: "/images/b-fb.svg",
-  },
-  {
-    name: "Instagram",
-    href: "https://www.facebook.com/",
-    icon: "/images/b-insta.svg",
-  },
+ 
+ 
   {
     name: "LinkedIn",
-    href: "https://www.facebook.com/",
+    href: "https://www.linkedin.com/in/tauheed-khan-0781aa334/",
     icon: "/images/b-linked.svg",
   },
   {
     name: "WhatsApp",
-    href: "https://www.facebook.com/",
+    href: "https://wa.me/923237594869",
     icon: "/images/b-whatsapp.svg",
   },
 ];
+
+export default footerIconsList;
+
 
 export {
   navItems,
