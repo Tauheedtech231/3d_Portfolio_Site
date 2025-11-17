@@ -1,93 +1,258 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { slides } from "../constants";
-import gsap from "gsap";
 
 const Carousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    gsap.to(".slider-container", {
-      x: `-${currentSlide * 63}vw`,
-      duration: 1,
-      ease: "power2.inOut",
-    });
-  }, [currentSlide]);
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
-  return (
-    <div className="relative w-full">
-      {/* Carousel Viewport */}
-      <div className="w-full relative lg:h-[60vh] md:h-[40vh] h-[60vh] overflow-hidden">
-        {/* Gradient overlays */}
-        <div className="carousel-gradient-left-box md:w-52 w-16 h-full absolute bottom-0 left-0 z-20"></div>
-        <div className="carousel-gradient-right-box md:w-52 w-16 h-full absolute bottom-0 right-0 z-20"></div>
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, []);
 
-        {/* Slides */}
-        <div className="slider-container flex absolute w-max -left-[43vw] top-0 gap-[3vw]">
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              className="slider-item w-[60vw] h-full flex-none relative rounded-2xl overflow-hidden"
-            >
-              <img
-                src={slide.img}
-                alt={slide.title}
-                className="w-full h-full object-cover object-center"
-              />
-              <div className="absolute bottom-0 left-0 w-full h-20 bg-black-300 bg-opacity-90 px-5 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <p className="md:text-2xl text-white/80">{index + 1}.</p>
-                  <p className="md:text-2xl text-white/80">{slide.title}</p>
-                </div>
-                <div className="flex items-center gap-5">
-                  {slide.url && (
-                    <a
-                      href={slide.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/80 hidden md:flex items-center gap-2 text-2xl hover:text-green-400 transition"
-                    >
-                      Preview Project
-                      <img
-                        src="/images/arrowupright.svg"
-                        alt="arrow"
-                        className="w-7 h-7"
-                      />
-                    </a>
-                  )}
-                </div>
-              </div>
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, []);
+
+  // Auto-play
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [nextSlide]);
+
+  // Stacked Cards Effect for Desktop - FIXED SIZING
+  const DesktopView = () => (
+    <div className="hidden md:block relative h-[500px] w-full max-w-5xl mx-auto px-4">
+      {/* Main Active Card - PROPERLY SIZED */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-[85%] max-w-4xl h-[450px] transition-all duration-500">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-gray-900">
+          <img
+            src={slides[currentSlide].img}
+            alt={slides[currentSlide].title}
+            className="w-full h-full object-contain bg-black" // Changed to object-contain
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-white text-2xl font-bold">
+                {slides[currentSlide].title}
+              </h3>
+              {slides[currentSlide].url && (
+                <a
+                  href={slides[currentSlide].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all flex items-center gap-2 text-sm"
+                >
+                  View Project
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              )}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* Navigation Arrows */}
-      <div className="mt-10 flex justify-end gap-5 md:-translate-x-32 -translate-x-5">
-        <div
-          onClick={prevSlide}
-          className="rounded-full cursor-pointer bg-blue-50 hover:bg-pink-100 active:scale-90 transition-all w-12 h-12 flex-center"
-        >
-          <img src="/images/CaretLeft.svg" alt="left" className="w-5 h-5" />
+      {/* Previous Card (Left Stack) */}
+      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-20 opacity-60 blur-[1px]">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-xl bg-gray-800 border border-white/10">
+          <img
+            src={slides[(currentSlide - 1 + slides.length) % slides.length].img}
+            alt="previous"
+            className="w-full h-full object-contain bg-black opacity-80"
+          />
         </div>
-        <div
-          onClick={nextSlide}
-          className="rounded-full cursor-pointer bg-blue-50 hover:bg-pink-100 active:scale-90 transition-all w-12 h-12 flex-center"
+      </div>
+
+      {/* Next Card (Right Stack) */}
+      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-10 opacity-40 blur-[2px]">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg bg-gray-800 border border-white/10">
+          <img
+            src={slides[(currentSlide + 1) % slides.length].img}
+            alt="next"
+            className="w-full h-full object-contain bg-black opacity-60"
+          />
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 flex items-center gap-6">
+        <button
+          onClick={prevSlide}
+          className="bg-white shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform hover:bg-blue-50"
+          aria-label="Previous project"
         >
-          <img src="/images/CaretRight.svg" alt="right" className="w-5 h-5" />
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <div className="flex gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+          <span className="text-white font-bold text-sm">{currentSlide + 1}</span>
+          <span className="text-white/70 mx-1">/</span>
+          <span className="text-white/70 text-sm">{slides.length}</span>
+        </div>
+
+        <button
+          onClick={nextSlide}
+          className="bg-white shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform hover:bg-blue-50"
+          aria-label="Next project"
+        >
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Additional Indicators */}
+      <div className="absolute -bottom-24 left-1/2 transform -translate-x-1/2 flex gap-2">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              index === currentSlide ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60'
+            }`}
+            aria-label={`View project ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  // Mobile View - FIXED RESPONSIVENESS
+  const MobileView = () => (
+    <div className="block md:hidden w-full px-4">
+      {/* Current Slide - PROPERLY CONTAINED */}
+      <div className="relative w-full h-[300px] rounded-xl overflow-hidden shadow-2xl mb-6 bg-black border border-white/10">
+        <img
+          src={slides[currentSlide].img}
+          alt={slides[currentSlide].title}
+          className="w-full h-full object-contain" // Changed to object-contain
+        />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-4">
+          <h3 className="text-white text-lg font-bold mb-2 truncate">
+            {slides[currentSlide].title}
+          </h3>
+          {slides[currentSlide].url && (
+            <a
+              href={slides[currentSlide].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-xs hover:bg-white/30 transition-all"
+            >
+              View Project
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Thumbnail Grid - IMPROVED LAYOUT */}
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        {slides.map((slide, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            className={`relative aspect-square rounded-lg overflow-hidden transition-all border-2 ${
+              index === currentSlide 
+                ? 'border-blue-400 scale-105 shadow-lg' 
+                : 'border-white/20 hover:border-white/40'
+            }`}
+            aria-label={`Select project ${index + 1}`}
+          >
+            <img
+              src={slide.img}
+              alt={slide.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <span className="text-white font-bold text-xs bg-black/50 rounded-full w-5 h-5 flex items-center justify-center">
+                {index + 1}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile Navigation - IMPROVED */}
+      <div className="flex justify-between items-center bg-white/5 backdrop-blur-sm rounded-2xl p-3">
+        <button
+          onClick={prevSlide}
+          className="flex items-center gap-2 text-white text-sm bg-white/10 rounded-full px-4 py-2 hover:bg-white/20 transition-all"
+          aria-label="Previous project"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Prev
+        </button>
+        
+        <div className="flex items-center gap-2 text-white">
+          <span className="font-bold">{currentSlide + 1}</span>
+          <span className="text-white/60">/</span>
+          <span className="text-white/60">{slides.length}</span>
+        </div>
+
+        <button
+          onClick={nextSlide}
+          className="flex items-center gap-2 text-white text-sm bg-white/10 rounded-full px-4 py-2 hover:bg-white/20 transition-all"
+          aria-label="Next project"
+        >
+          Next
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="w-full py-8 bg-gradient-to-br from-gray-900 to-black min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-7xl">
+        {/* Header */}
+        <div className="text-center mb-12 px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Featured Projects
+          </h2>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Click on any project to view details or visit the live demo
+          </p>
+        </div>
+
+        {/* Carousel */}
+        {isMobile ? <MobileView /> : <DesktopView />}
+
+        {/* Project Info */}
+        <div className="text-center mt-16 px-4">
+          <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/10">
+            <div className="flex items-center gap-2 text-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm">Click thumbnails to navigate</span>
+            </div>
+            <div className="w-px h-4 bg-white/20"></div>
+            <div className="text-white/60 text-sm">
+              {currentSlide + 1} of {slides.length} projects
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 };
 
 export default Carousel;

@@ -13,7 +13,7 @@ import {
 
 const App = () => {
   return (
-    <div className="bg-black-100">
+    <div className="bg-black-100 pt-20">
       <Loader />
       <NavBar />
       <Sidebar />
