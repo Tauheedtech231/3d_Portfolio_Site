@@ -5,36 +5,38 @@ import { navItems } from "../constants";
 import { Code, ChevronRight } from "lucide-react";
 /* eslint-disable react/no-unknown-property */
 
-
-
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
 
-  // Handle scroll effect
+  // Smooth scroll detection
   useEffect(() => {
+    let timeout;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-      
-      // Update active section based on scroll position
-      const sections = navItems.map(item => item.href.substring(1));
-      const current = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        }
-        return false;
-      });
-      if (current) setActiveSection(current);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsScrolled(window.scrollY > 50);
+
+        const sections = navItems.map((item) => item.href.substring(1));
+        const current = sections.find((section) => {
+          const el = document.getElementById(section);
+          if (!el) return false;
+
+          const rect = el.getBoundingClientRect();
+          return rect.top <= 120 && rect.bottom >= 120;
+        });
+
+        if (current) setActiveSection(current);
+      }, 60);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when clicking on a link
+  // Smooth scrolling to section
   const handleNavClick = (href) => {
     setIsMobileMenuOpen(false);
     const element = document.getElementById(href.substring(1));
@@ -45,42 +47,45 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        isScrolled 
-          ? "bg-gray-900/80 backdrop-blur-xl border-b border-white/10 py-3 shadow-2xl" 
-          : "bg-transparent py-5"
-      } px-5 md:px-10`}>
+      {/* NAVBAR */}
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transform-gpu transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          isScrolled
+            ? "bg-[#0D0D12]/90 backdrop-blur-xl border-b border-white/10 py-3 shadow-xl"
+            : "bg-transparent py-5"
+        } px-5 md:px-10`}
+      >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          
-          {/* Logo with Animation */}
+
+          {/* Logo */}
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className={`relative transition-all duration-500 ${
-              isScrolled ? "scale-90" : "scale-100"
-            }`}>
-              {/* Animated Background */}
-              <div className="absolute -inset-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-              
-              {/* Logo Icon */}
-              <div className="relative bg-gray-900 rounded-xl p-2 border border-white/10">
-                <Code className="text-white w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300" />
+            <div
+              className={`relative transition-all duration-700 transform-gpu ${
+                isScrolled ? "scale-95" : "scale-100"
+              }`}
+            >
+              {/* Purple glow */}
+              <div className="absolute -inset-2 bg-[#A855F7] rounded-full blur-md opacity-20 group-hover:opacity-40 transition-all duration-700"></div>
+
+              <div className="relative bg-[#0D0D12] rounded-xl p-2 border border-white/10">
+                <Code className="text-[#F5F5F5] w-6 h-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
               </div>
-              
-              {/* Pulsing Dot */}
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#A855F7] rounded-full animate-pulse" />
             </div>
-            
+
             <div className="flex flex-col">
-              <span className="text-white font-bold text-sm md:text-base tracking-wide">
+              <span className="text-[#F5F5F5] font-bold text-base tracking-wide">
                 TAUHEED
               </span>
-              <span className="text-white/60 text-xs md:text-sm font-medium tracking-wider">
+              <span className="text-[#A1A1AA] text-sm font-medium tracking-wider">
                 DEVELOPER
               </span>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1 bg-gray-800/50 backdrop-blur-sm rounded-2xl p-1 border border-white/10">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-1 bg-[#1A1A22]/50 backdrop-blur-lg rounded-2xl p-1 border border-white/10">
             {navItems.map((item, index) => (
               <a
                 key={index}
@@ -89,44 +94,34 @@ const NavBar = () => {
                   e.preventDefault();
                   handleNavClick(item.href);
                 }}
-                className={`relative px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 group ${
+                className={`relative px-6 py-3 rounded-xl text-sm font-medium transition-all duration-500 transform-gpu group ${
                   activeSection === item.href.substring(1)
-                    ? "text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30"
-                    : "text-white/70 hover:text-white hover:bg-white/5"
+                    ? "text-[#F5F5F5] bg-[#A855F7]/20 border border-[#A855F7]/40 shadow-lg shadow-[#A855F7]/20"
+                    : "text-[#A1A1AA] hover:text-[#F5F5F5] hover:bg-white/5"
                 }`}
               >
                 <span className="relative z-10">{item.name}</span>
-                
-                {/* Hover Effect */}
+
+                {/* Hover Background */}
                 {activeSection !== item.href.substring(1) && (
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
-                )}
-                
-                {/* Active Indicator - CSS based instead of Framer Motion */}
-                {activeSection === item.href.substring(1) && (
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse-slow" />
+                  <div className="absolute inset-0 rounded-xl bg-[#A855F7]/0 group-hover:bg-[#A855F7]/10 transition-all duration-500"></div>
                 )}
               </a>
             ))}
           </div>
 
-          {/* Mobile Menu Button */}
-          
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* MOBILE MENU */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden pt-20">
-          {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          
-          {/* Menu Content */}
-          <div className="relative z-50 bg-gray-900/95 backdrop-blur-xl border-b border-white/10 mx-4 rounded-2xl overflow-hidden">
-            <div className="p-4 space-y-2">
+          <div className="relative z-50 bg-[#0D0D12]/95 backdrop-blur-xl border-b border-white/10 mx-4 rounded-2xl overflow-hidden">
+            <div className="p-5 space-y-2">
               {navItems.map((item, index) => (
                 <a
                   key={index}
@@ -135,61 +130,42 @@ const NavBar = () => {
                     e.preventDefault();
                     handleNavClick(item.href);
                   }}
-                  className={`flex items-center gap-3 px-4 py-4 rounded-xl text-base font-medium transition-all duration-300 group ${
+                  className={`flex items-center gap-3 px-4 py-4 rounded-xl text-lg font-medium transition-all duration-500 transform-gpu ${
                     activeSection === item.href.substring(1)
-                      ? "text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
+                      ? "text-[#F5F5F5] bg-[#A855F7]/20 border border-[#A855F7]/40"
+                      : "text-[#A1A1AA] hover:text-[#F5F5F5] hover:bg-white/5"
                   }`}
                 >
-                  {/* Animated Dot */}
-                  <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    activeSection === item.href.substring(1)
-                      ? "bg-gradient-to-r from-purple-400 to-pink-400 scale-125"
-                      : "bg-white/30 group-hover:bg-white/50"
-                  }`} />
-                  
-                  <span>{item.name}</span>
-                  
-                  {/* Arrow Indicator */}
-                  <div className={`ml-auto transition-transform duration-300 ${
-                    activeSection === item.href.substring(1) ? "rotate-45" : "group-hover:translate-x-1"
-                  }`}>
-                    <ChevronRight className="w-4 h-4 text-purple-400" />
-                  </div>
+                  <div
+                    className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                      activeSection === item.href.substring(1)
+                        ? "bg-[#A855F7]"
+                        : "bg-[#A1A1AA]/40"
+                    }`}
+                  />
+
+                  {item.name}
+                  <ChevronRight className="ml-auto w-5 h-5 text-[#A855F7]" />
                 </a>
               ))}
-            </div>
-            
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10">
-              <div className="text-center text-white/50 text-sm">
-                Crafted with 💻
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Progress Bar */}
+      {/* PROGRESS BAR */}
       <div className="fixed top-0 left-0 w-full h-1 z-50">
-        <div 
-          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+        <div
+          className="h-full bg-[#A855F7] transition-all duration-500"
           style={{
-            width: `${(navItems.findIndex(item => item.href.substring(1) === activeSection) + 1) / navItems.length * 100}%`
+            width: `${
+              ((navItems.findIndex((i) => i.href.substring(1) === activeSection) + 1) /
+                navItems.length) *
+              100
+            }%`,
           }}
-        />
+        ></div>
       </div>
-
-      {/* Custom CSS Animation */}
-      <style jsx>{`
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.8; }
-          50% { opacity: 1; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 2s ease-in-out infinite;
-        }
-      `}</style>
     </>
   );
 };

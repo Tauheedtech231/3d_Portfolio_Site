@@ -30,18 +30,18 @@ const Carousel = () => {
     return () => clearInterval(interval);
   }, [nextSlide]);
 
-  // Stacked Cards Effect for Desktop - FIXED SIZING
+  // Stacked Cards Effect for Desktop - PREMIUM STYLING
   const DesktopView = () => (
     <div className="hidden md:block relative h-[500px] w-full max-w-5xl mx-auto px-4">
-      {/* Main Active Card - PROPERLY SIZED */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-[85%] max-w-4xl h-[450px] transition-all duration-500">
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-gray-900">
+      {/* Main Active Card - PREMIUM STYLING */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-[85%] max-w-4xl h-[450px] transition-all duration-500 group">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-purple-500/20 bg-[#1A1A22] group-hover:border-purple-400/40 group-hover:shadow-purple-500/10 transition-all duration-500">
           <img
             src={slides[currentSlide].img}
             alt={slides[currentSlide].title}
-            className="w-full h-full object-contain bg-black" // Changed to object-contain
+            className="w-full h-full object-contain bg-black transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-6">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1A1A22] via-[#1A1A22]/90 to-transparent p-6">
             <div className="flex justify-between items-center">
               <h3 className="text-white text-2xl font-bold">
                 {slides[currentSlide].title}
@@ -51,7 +51,7 @@ const Carousel = () => {
                   href={slides[currentSlide].url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all flex items-center gap-2 text-sm"
+                  className="bg-purple-500/10 backdrop-blur-sm text-purple-300 px-6 py-3 rounded-xl hover:bg-purple-500/20 hover:text-white border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 flex items-center gap-2 text-sm hover:scale-105"
                 >
                   View Project
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,8 +65,8 @@ const Carousel = () => {
       </div>
 
       {/* Previous Card (Left Stack) */}
-      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-20 opacity-60 blur-[1px]">
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-xl bg-gray-800 border border-white/10">
+      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-20 opacity-60 blur-[1px] group">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-xl bg-[#1A1A22] border border-purple-500/10 group-hover:border-purple-500/20 transition-all duration-500">
           <img
             src={slides[(currentSlide - 1 + slides.length) % slides.length].img}
             alt="previous"
@@ -76,8 +76,8 @@ const Carousel = () => {
       </div>
 
       {/* Next Card (Right Stack) */}
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-10 opacity-40 blur-[2px]">
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg bg-gray-800 border border-white/10">
+      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 w-[75%] h-[400px] z-10 opacity-40 blur-[2px] group">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg bg-[#1A1A22] border border-purple-500/10 group-hover:border-purple-500/20 transition-all duration-500">
           <img
             src={slides[(currentSlide + 1) % slides.length].img}
             alt="next"
@@ -90,26 +90,26 @@ const Carousel = () => {
       <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 flex items-center gap-6">
         <button
           onClick={prevSlide}
-          className="bg-white shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform hover:bg-blue-50"
+          className="bg-[#1A1A22] shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-all duration-300 hover:bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/40 group"
           aria-label="Previous project"
         >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-purple-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         
-        <div className="flex gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-          <span className="text-white font-bold text-sm">{currentSlide + 1}</span>
+        <div className="flex gap-2 bg-[#1A1A22] backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/20">
+          <span className="text-purple-300 font-bold text-sm">{currentSlide + 1}</span>
           <span className="text-white/70 mx-1">/</span>
           <span className="text-white/70 text-sm">{slides.length}</span>
         </div>
 
         <button
           onClick={nextSlide}
-          className="bg-white shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform hover:bg-blue-50"
+          className="bg-[#1A1A22] shadow-2xl rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition-all duration-300 hover:bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/40 group"
           aria-label="Next project"
         >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-purple-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -121,8 +121,10 @@ const Carousel = () => {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentSlide ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60'
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === currentSlide 
+                ? 'bg-purple-400 scale-125 shadow-sm shadow-purple-400/50' 
+                : 'bg-white/40 hover:bg-purple-300/60 hover:scale-110'
             }`}
             aria-label={`View project ${index + 1}`}
           />
@@ -131,17 +133,17 @@ const Carousel = () => {
     </div>
   );
 
-  // Mobile View - FIXED RESPONSIVENESS
+  // Mobile View - PREMIUM STYLING
   const MobileView = () => (
     <div className="block md:hidden w-full px-4">
-      {/* Current Slide - PROPERLY CONTAINED */}
-      <div className="relative w-full h-[300px] rounded-xl overflow-hidden shadow-2xl mb-6 bg-black border border-white/10">
+      {/* Current Slide - PREMIUM STYLING */}
+      <div className="relative w-full h-[300px] rounded-xl overflow-hidden shadow-2xl mb-6 bg-[#1A1A22] border border-purple-500/20 group hover:border-purple-400/40 transition-all duration-500">
         <img
           src={slides[currentSlide].img}
           alt={slides[currentSlide].title}
-          className="w-full h-full object-contain" // Changed to object-contain
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1A1A22] to-transparent p-4">
           <h3 className="text-white text-lg font-bold mb-2 truncate">
             {slides[currentSlide].title}
           </h3>
@@ -150,7 +152,7 @@ const Carousel = () => {
               href={slides[currentSlide].url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-xs hover:bg-white/30 transition-all"
+              className="inline-flex items-center gap-1 bg-purple-500/10 backdrop-blur-sm text-purple-300 px-3 py-1 rounded-lg text-xs hover:bg-purple-500/20 hover:text-white border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
             >
               View Project
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,26 +163,30 @@ const Carousel = () => {
         </div>
       </div>
 
-      {/* Thumbnail Grid - IMPROVED LAYOUT */}
+      {/* Thumbnail Grid - PREMIUM STYLING */}
       <div className="grid grid-cols-3 gap-2 mb-6">
         {slides.map((slide, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`relative aspect-square rounded-lg overflow-hidden transition-all border-2 ${
+            className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-300 border-2 group ${
               index === currentSlide 
-                ? 'border-blue-400 scale-105 shadow-lg' 
-                : 'border-white/20 hover:border-white/40'
+                ? 'border-purple-400 scale-105 shadow-lg shadow-purple-500/20' 
+                : 'border-purple-500/20 hover:border-purple-400/40 hover:scale-102'
             }`}
             aria-label={`Select project ${index + 1}`}
           >
             <img
               src={slide.img}
               alt={slide.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <span className="text-white font-bold text-xs bg-black/50 rounded-full w-5 h-5 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-purple-500/10 transition-all duration-300">
+              <span className={`text-white font-bold text-xs rounded-full w-5 h-5 flex items-center justify-center transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'bg-purple-500' 
+                  : 'bg-black/50 group-hover:bg-purple-500/80'
+              }`}>
                 {index + 1}
               </span>
             </div>
@@ -188,11 +194,11 @@ const Carousel = () => {
         ))}
       </div>
 
-      {/* Mobile Navigation - IMPROVED */}
-      <div className="flex justify-between items-center bg-white/5 backdrop-blur-sm rounded-2xl p-3">
+      {/* Mobile Navigation - PREMIUM STYLING */}
+      <div className="flex justify-between items-center bg-[#1A1A22] backdrop-blur-sm rounded-2xl p-3 border border-purple-500/10">
         <button
           onClick={prevSlide}
-          className="flex items-center gap-2 text-white text-sm bg-white/10 rounded-full px-4 py-2 hover:bg-white/20 transition-all"
+          className="flex items-center gap-2 text-purple-300 text-sm bg-purple-500/10 rounded-full px-4 py-2 hover:bg-purple-500/20 hover:text-white border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
           aria-label="Previous project"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,15 +207,15 @@ const Carousel = () => {
           Prev
         </button>
         
-        <div className="flex items-center gap-2 text-white">
-          <span className="font-bold">{currentSlide + 1}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-purple-300 font-bold">{currentSlide + 1}</span>
           <span className="text-white/60">/</span>
           <span className="text-white/60">{slides.length}</span>
         </div>
 
         <button
           onClick={nextSlide}
-          className="flex items-center gap-2 text-white text-sm bg-white/10 rounded-full px-4 py-2 hover:bg-white/20 transition-all"
+          className="flex items-center gap-2 text-purple-300 text-sm bg-purple-500/10 rounded-full px-4 py-2 hover:bg-purple-500/20 hover:text-white border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
           aria-label="Next project"
         >
           Next
@@ -222,7 +228,7 @@ const Carousel = () => {
   );
 
   return (
-    <div className="w-full py-8 bg-gradient-to-br from-gray-900 to-black min-h-screen flex items-center justify-center">
+    <div className="w-full py-8 bg-[#13131A] min-h-screen flex items-center justify-center">
       <div className="w-full max-w-7xl">
         {/* Header */}
         <div className="text-center mb-12 px-4">
@@ -239,12 +245,12 @@ const Carousel = () => {
 
         {/* Project Info */}
         <div className="text-center mt-16 px-4">
-          <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/10">
-            <div className="flex items-center gap-2 text-green-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <div className="inline-flex items-center gap-4 bg-[#1A1A22] backdrop-blur-sm rounded-2xl px-6 py-3 border border-purple-500/10">
+            <div className="flex items-center gap-2 text-purple-300">
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
               <span className="text-sm">Click thumbnails to navigate</span>
             </div>
-            <div className="w-px h-4 bg-white/20"></div>
+            <div className="w-px h-4 bg-purple-500/20"></div>
             <div className="text-white/60 text-sm">
               {currentSlide + 1} of {slides.length} projects
             </div>

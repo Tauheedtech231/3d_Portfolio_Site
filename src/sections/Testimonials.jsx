@@ -37,6 +37,8 @@ const myJourney = [
 
 const StarField = () => {
   const canvasRef = useRef(null);
+  const frameRef = useRef(null);
+  const starsRef = useRef([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -45,116 +47,95 @@ const StarField = () => {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
+    // Set canvas size
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const stars = [];
-    const starCount = 150;
-
-    for (let i = 0; i < starCount; i++) {
-      stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.2 + 0.3,
-        speed: Math.random() * 0.3 + 0.1,
-        opacity: Math.random() * 0.6 + 0.2,
-        pulseSpeed: Math.random() * 0.03 + 0.01,
-        pulseDirection: Math.random() > 0.5 ? 1 : -1
-      });
-    }
-
-    const shootingStars = [];
-    let lastShootingStar = 0;
-
-    const createShootingStar = () => {
-      shootingStars.push({
-        x: Math.random() * canvas.width,
-        y: 0,
-        speedX: (Math.random() * 6 + 3) * (Math.random() > 0.5 ? 1 : -1),
-        speedY: Math.random() * 3 + 1.5,
-        length: Math.random() * 40 + 20,
-        opacity: 1,
-        life: 1
-      });
+      initStars(); // Reinitialize stars on resize
     };
 
+    // Initialize stars
+    const initStars = () => {
+      const stars = [];
+      const starCount = Math.min(80, Math.floor(window.innerWidth * window.innerHeight / 10000));
+      
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          z: Math.random() * 0.8 + 0.3,
+          size: Math.random() * 1.2 + 0.3,
+          speed: Math.random() * 0.6 + 0.2,
+          opacity: Math.random() * 0.5 + 0.3,
+          pulseSpeed: Math.random() * 0.03 + 0.01,
+          pulseDirection: 1
+        });
+      }
+      starsRef.current = stars;
+    };
+
+    // Animation function
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 10, 20, 0.05)';
+      // Clear canvas with subtle fade effect for trails
+      ctx.fillStyle = 'rgba(13, 13, 18, 0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const currentTime = Date.now();
-
-      if (currentTime - lastShootingStar > 3000 && Math.random() < 0.01) {
-        createShootingStar();
-        lastShootingStar = currentTime;
-      }
-
+      const stars = starsRef.current;
+      
+      // Update and draw stars
       stars.forEach(star => {
-        star.y += star.speed;
+        // Move star based on depth
+        star.y += star.speed * star.z * 1.5;
+        
+        // Reset star if it goes off screen
         if (star.y > canvas.height) {
           star.y = 0;
           star.x = Math.random() * canvas.width;
+          star.z = Math.random() * 0.8 + 0.3;
         }
 
+        // Pulsing effect
         star.opacity += star.pulseSpeed * star.pulseDirection;
-        if (star.opacity > 0.8 || star.opacity < 0.2) {
+        if (star.opacity > 0.7 || star.opacity < 0.2) {
           star.pulseDirection *= -1;
         }
 
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        
+        // Calculate star properties based on depth
+        const size = star.size * star.z;
+        const brightness = star.opacity * star.z;
+
+        // Create gradient for star
         const gradient = ctx.createRadialGradient(
           star.x, star.y, 0,
-          star.x, star.y, star.radius * 2
+          star.x, star.y, size * 2.5
         );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
         
+        // Use the purple color palette with depth-based opacity
+        gradient.addColorStop(0, `rgba(168, 85, 247, ${brightness})`);
+        gradient.addColorStop(0.7, `rgba(168, 85, 247, ${brightness * 0.2})`);
+        gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+
+        // Draw star
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
       });
 
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const star = shootingStars[i];
-        
-        star.x += star.speedX;
-        star.y += star.speedY;
-        star.life -= 0.015;
-
-        if (star.life <= 0 || star.x < 0 || star.x > canvas.width || star.y > canvas.height) {
-          shootingStars.splice(i, 1);
-          continue;
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(star.x, star.y);
-        ctx.lineTo(star.x - star.speedX * 2, star.y - star.speedY * 2);
-        
-        const gradient = ctx.createLinearGradient(
-          star.x, star.y,
-          star.x - star.speedX * 2, star.y - star.speedY * 2
-        );
-        gradient.addColorStop(0, `rgba(100, 200, 255, ${star.life})`);
-        gradient.addColorStop(1, 'rgba(100, 200, 255, 0)');
-        
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
+      frameRef.current = requestAnimationFrame(animate);
     };
 
+    // Initialize and start animation
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
     animate();
 
+    // Cleanup
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrameId);
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
     };
   }, []);
 
@@ -162,8 +143,47 @@ const StarField = () => {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ background: 'linear-gradient(to bottom, #0a0a1a, #1a1a2e, #16213e)' }}
     />
+  );
+};
+
+// Floating particles for additional depth
+const FloatingParticles = () => {
+  const particles = Array.from({ length: 8 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 2 + 1,
+    duration: Math.random() * 12 + 10,
+    delay: Math.random() * 3,
+  }));
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-[#A855F7]"
+          style={{
+            width: particle.size,
+            height: particle.size,
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+          }}
+          animate={{
+            x: [0, Math.random() * 30 - 15],
+            y: [0, Math.random() * 30 - 15],
+            opacity: [0.1, 0.2, 0.1],
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Infinity,
+            delay: particle.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
   );
 };
 
@@ -181,15 +201,17 @@ const JourneyCard = ({ item, index }) => {
   const cardVariants = {
     hidden: { 
       opacity: 0, 
-      y: 50
+      y: 30,
+      scale: 0.95
     },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
-        delay: index * 0.2
+        ease: [0.25, 0.1, 0.25, 1],
+        delay: index * 0.15
       }
     }
   };
@@ -199,9 +221,9 @@ const JourneyCard = ({ item, index }) => {
     visible: {
       width: `${item.progress}%`,
       transition: {
-        duration: 1.5,
+        duration: 1.2,
         ease: "easeOut",
-        delay: index * 0.2 + 0.3
+        delay: index * 0.15 + 0.3
       }
     }
   };
@@ -211,86 +233,114 @@ const JourneyCard = ({ item, index }) => {
     return icons[index] || "🌟";
   };
 
-  const getGradient = (index) => {
-    const gradients = [
-      "from-blue-500 to-cyan-400",
-      "from-green-500 to-emerald-400", 
-      "from-purple-500 to-pink-400",
-      "from-orange-500 to-red-400"
-    ];
-    return gradients[index] || "from-gray-500 to-gray-400";
-  };
-
   return (
     <motion.div
       ref={ref}
-      className="relative flex items-center justify-center mb-8 md:mb-16"
+      className="relative flex items-center justify-center mb-8 md:mb-12"
       variants={cardVariants}
       initial="hidden"
       animate={controls}
     >
       {/* Timeline Line Connector */}
       {index < myJourney.length - 1 && (
-        <div className={`absolute top-16 left-4 md:left-1/2 w-0.5 h-8 md:h-16 bg-gradient-to-b ${getGradient(index)} z-0`} />
+        <motion.div 
+          className="absolute top-16 left-4 md:left-1/2 w-0.5 h-8 md:h-12 bg-gradient-to-b from-[#A855F7]/40 to-[#C084FC]/40 z-0"
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          transition={{ 
+            duration: 0.8, 
+            delay: index * 0.15 + 0.5,
+            ease: "easeOut"
+          }}
+        />
       )}
 
       {/* Main Card */}
-      <div className="relative bg-gray-900/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-8 w-full max-w-2xl border border-gray-700/50 shadow-xl z-10 ml-12 md:ml-0">
+      <div className="relative bg-[#1A1A22]/80 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-6 w-full max-w-2xl border border-[#A855F7]/10 shadow-lg hover:shadow-[#A855F7]/5 hover:border-[#A855F7]/20 transition-all duration-300 z-10 ml-12 md:ml-0 group">
         {/* Icon Badge */}
         <motion.div
-          className={`absolute -left-10 md:-left-6 top-4 md:-top-6 w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${getGradient(index)} flex items-center justify-center text-xl md:text-2xl shadow-xl border-2 md:border-4 border-gray-900`}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+          className="absolute -left-10 md:-left-6 top-4 md:-top-6 w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-[#A855F7] to-[#C084FC] flex items-center justify-center text-lg md:text-xl shadow-lg border-2 border-[#1A1A22] group-hover:scale-110 transition-transform duration-300"
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
           transition={{ 
             type: "spring", 
-            stiffness: 200,
-            delay: index * 0.2 + 0.1
+            stiffness: 300,
+            damping: 20,
+            delay: index * 0.15 + 0.2
+          }}
+          whileHover={{
+            scale: 1.15,
+            rotate: 5,
+            transition: { duration: 0.3 }
           }}
         >
           {getIcon(index)}
         </motion.div>
 
         {/* Progress Ribbon */}
-        <div className="absolute -top-2 right-4 md:right-8 bg-gradient-to-r from-green-400 to-blue-500 text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+        <motion.div 
+          className="absolute -top-2 right-4 md:right-6 bg-gradient-to-r from-[#A855F7] to-[#C084FC] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: index * 0.15 + 0.4 }}
+        >
           {item.progress}% Complete
-        </div>
+        </motion.div>
 
         {/* Content */}
-        <div className="mt-2 md:mt-4">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-3 md:mb-4">
-            <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 text-lg md:text-xl font-bold leading-tight pr-4 mb-2 md:mb-0">
+        <div className="mt-2 md:mt-3">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-3">
+            <motion.h3 
+              className="text-white text-base md:text-lg font-semibold leading-tight pr-4 mb-2 md:mb-0"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.15 + 0.3 }}
+            >
               {item.title}
-            </h3>
-            <span className="text-green-400 font-semibold text-base md:text-lg whitespace-nowrap">
+            </motion.h3>
+            <motion.span 
+              className="text-[#C084FC] font-medium text-sm md:text-base whitespace-nowrap"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.15 + 0.35 }}
+            >
               {item.year}
-            </span>
+            </motion.span>
           </div>
 
           <motion.p 
-            className="text-gray-300 leading-relaxed mb-4 md:mb-6 text-sm md:text-base whitespace-pre-line"
+            className="text-[#A1A1AA] leading-relaxed mb-4 text-sm md:text-base whitespace-pre-line"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: index * 0.2 + 0.5 }}
+            transition={{ delay: index * 0.15 + 0.4 }}
           >
             {item.details}
           </motion.p>
 
           {/* Animated Progress Bar */}
-          <div className="relative">
-            <div className="flex justify-between text-xs md:text-sm text-gray-400 mb-2">
+          <motion.div 
+            className="relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: index * 0.15 + 0.5 }}
+          >
+            <div className="flex justify-between text-xs text-[#A1A1AA] mb-2">
               <span>Progress</span>
               <span>{item.progress}%</span>
             </div>
-            <div className="w-full h-2 md:h-3 bg-gray-800 rounded-full overflow-hidden shadow-inner">
+            <div className="w-full h-1.5 bg-[#0D0D12] rounded-full overflow-hidden shadow-inner">
               <motion.div
-                className={`h-2 md:h-3 bg-gradient-to-r ${getGradient(index)} rounded-full`}
+                className="h-1.5 bg-gradient-to-r from-[#A855F7] to-[#C084FC] rounded-full shadow-sm"
                 variants={progressVariants}
                 initial="hidden"
                 animate="visible"
               />
             </div>
-          </div>
+          </motion.div>
         </div>
+
+        {/* Hover Glow Effect */}
+        <div className="absolute inset-0 rounded-xl md:rounded-2xl bg-gradient-to-r from-[#A855F7]/0 via-[#A855F7]/5 to-[#A855F7]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       </div>
     </motion.div>
   );
@@ -315,15 +365,51 @@ const Journey = () => {
       if (animatedCount < myJourney.length) {
         setAnimatedCount(prev => prev + 1);
       }
-    }, 400);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [animatedCount]);
 
+  // Ambient glow effects
+  const AmbientGlow = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#A855F7] rounded-full filter blur-[80px] opacity-5"
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.05, 0.08, 0.05],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-[#A855F7] rounded-full filter blur-[60px] opacity-5"
+        animate={{
+          scale: [1.1, 1, 1.1],
+          opacity: [0.08, 0.05, 0.08],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+    </div>
+  );
+
   return (
-    <section id="journey" className="relative min-h-screen flex items-center justify-center md:p-0 px-4 py-16 md:py-20 overflow-hidden">
+    <section id="journey" className="relative min-h-screen flex items-center justify-center md:p-0 px-4 py-16 md:py-20 overflow-hidden bg-[#0D0D12]">
       {/* Star Field Background */}
       <StarField />
+
+      {/* Floating Particles */}
+      <FloatingParticles />
+
+      {/* Ambient Glow Effects */}
+      <AmbientGlow />
 
       {/* Background Spheres */}
       <GradientSpheres
@@ -344,21 +430,30 @@ const Journey = () => {
           className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <div className="inline-flex items-center gap-4 md:gap-8 bg-gray-900/50 backdrop-blur-sm rounded-xl md:rounded-2xl px-6 md:px-8 py-3 md:py-4 border border-gray-700/50">
+          <div className="inline-flex items-center gap-4 md:gap-8 bg-[#1A1A22]/80 backdrop-blur-lg rounded-lg md:rounded-xl px-6 md:px-8 py-3 md:py-4 border border-[#A855F7]/10 hover:border-[#A855F7]/20 transition-all duration-300">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+              <motion.div 
+                className="text-2xl md:text-3xl font-bold text-[#A855F7]"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200,
+                  delay: 0.2
+                }}
+              >
                 {animatedCount}
-              </div>
-              <div className="text-gray-400 text-xs md:text-sm">Milestones</div>
+              </motion.div>
+              <div className="text-[#A1A1AA] text-xs md:text-sm">Milestones</div>
             </div>
-            <div className="w-px h-8 md:h-12 bg-gray-600"></div>
+            <div className="w-px h-8 md:h-12 bg-[#A855F7]/20"></div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+              <div className="text-2xl md:text-3xl font-bold text-[#A855F7]">
                 {myJourney.length}
               </div>
-              <div className="text-gray-400 text-xs md:text-sm">Total</div>
+              <div className="text-[#A1A1AA] text-xs md:text-sm">Total</div>
             </div>
           </div>
         </motion.div>
@@ -366,10 +461,20 @@ const Journey = () => {
         {/* Timeline Container */}
         <div className="relative">
           {/* Vertical Center Line - Desktop */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 rounded-full z-0 hidden md:block" />
+          <motion.div 
+            className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-[#A855F7]/30 via-[#C084FC]/30 to-[#A855F7]/30 z-0 hidden md:block"
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
           
           {/* Vertical Left Line - Mobile */}
-          <div className="absolute left-4 top-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500 z-0 md:hidden" />
+          <motion.div 
+            className="absolute left-4 top-0 w-0.5 h-full bg-gradient-to-b from-[#A855F7]/30 to-[#C084FC]/30 z-0 md:hidden"
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
 
           {/* Journey Cards */}
           <div className="space-y-2 md:space-y-0">
@@ -381,7 +486,7 @@ const Journey = () => {
                 }`}
               >
                 <div className={`w-full md:w-5/6 lg:w-1/2 ${
-                  index % 2 === 0 ? "md:pr-6 lg:pr-12" : "md:pl-6 lg:pl-12"
+                  index % 2 === 0 ? "md:pr-6 lg:pr-8" : "md:pl-6 lg:pl-8"
                 }`}>
                   <JourneyCard item={item} index={index} />
                 </div>
@@ -392,31 +497,40 @@ const Journey = () => {
           {/* Completion Celebration */}
           <motion.div
             className="text-center mt-12 md:mt-16"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ 
               opacity: animatedCount === myJourney.length ? 1 : 0, 
-              scale: animatedCount === myJourney.length ? 1 : 0.8 
+              scale: animatedCount === myJourney.length ? 1 : 0.9,
+              y: animatedCount === myJourney.length ? 0 : 20
             }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-8 border border-green-400/20">
-              <h3 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 mb-3 md:mb-4">
+            <div className="bg-[#1A1A22]/80 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-6 border border-[#A855F7]/20 hover:border-[#A855F7]/30 transition-all duration-300">
+              <h3 className="text-lg md:text-xl font-semibold text-[#C084FC] mb-3">
                 🎉 Journey in Progress!
               </h3>
-              <p className="text-gray-300 text-base md:text-lg">
+              <p className="text-[#A1A1AA] text-sm md:text-base">
                 Every milestone is a step toward greater achievements. The adventure continues...
               </p>
             </div>
           </motion.div>
         </div>
 
-        {/* Simple Scroll to Top Button */}
-        <div className="fixed bottom-6 right-6 bg-gray-900/80 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-gray-700/50 shadow-xl cursor-pointer z-30 hidden md:block">
-          <div className="text-center" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="text-green-400 text-sm font-semibold">↑</div>
+        {/* Scroll to Top Button */}
+        <motion.div 
+          className="fixed bottom-6 right-6 bg-[#1A1A22]/80 backdrop-blur-xl rounded-lg p-3 border border-[#A855F7]/20 shadow-lg cursor-pointer z-30 hidden md:block hover:border-[#A855F7]/40 hover:scale-105 transition-all duration-300"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <div className="text-center">
+            <div className="text-[#A855F7] text-sm font-semibold">↑</div>
             <div className="text-white text-xs mt-1">Top</div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
